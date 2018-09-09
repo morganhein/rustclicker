@@ -1,0 +1,8 @@
+[2018-09-09 10:01:08][[95mDEBUG[0m][ggez::graphics::context] Window created.
+[2018-09-09 10:01:08][[95mDEBUG[0m][ggez::graphics::context]   Asked for     OpenGL 3.2 Core, vsync: true
+[2018-09-09 10:01:08][[95mDEBUG[0m][ggez::graphics::context]   Actually got: OpenGL 3.2 Core, vsync: VSync
+[2018-09-09 10:01:08][[95mDEBUG[0m][ggez::graphics::context]   Window size: 800x600, drawable size: 800x600, DPI: (158.00246, 157.82524, 158.56647)
+[2018-09-09 10:01:08][[95mDEBUG[0m][ggez::graphics::context]   Driver vendor: Intel Open Source Technology Center, renderer Mesa DRI Intel(R) HD Graphics 620 (Kaby Lake GT2) , version 4.5, shading language 4.50
+[2018-09-09 10:01:08][[32mINFO[0m ][ggez_game_template::world] Setting up resource path: "/home/morgan/projects/game-template/resources"
+[2018-09-09 10:01:08][[95mDEBUG[0m][ggez_game_template::resources] Loading image "/images/kiwi.png" from file "/home/morgan/projects/game-template/resources/images/kiwi.png"
+[2018-09-09 10:01:13][[95mDEBUG[0m][ggez::event] quit_event() callback called, quitting...

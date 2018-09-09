@@ -1,18 +1,20 @@
 [package]
-
-name = "clicker"
+name = "ggez_game_template"
 version = "0.1.0"
-authors = [
-    "Morgan <clicker@morganhe.in>",
-]
-
-[[bin]]
-name = "clicker"
+authors = ["Simon Heath <icefoxen@gmail.com>"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
 
 [dependencies]
-piston = "0.37.0"
-piston2d-graphics = "0.26.0"
-pistoncore-glutin_window = "0.47.0"
-piston2d-opengl_graphics = "0.53.0"
-find_folder = "0.3.0"
-piston_window = "0.80.0"
+# Game stuff
+ggez = "0.4"
+ggez-goodies = { git = "https://github.com/ggez/ggez-goodies", branch = "master" }
+specs = "0.10"
+specs-derive = "0.1"
+warmy = "0.8"
+
+# Utility stuff
+log = "0.4"
+fern = {version = "0.5", features = ["colored"] }
+chrono = "0.4"
+failure = "0.1"

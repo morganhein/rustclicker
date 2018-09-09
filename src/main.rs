@@ -1,108 +1,165 @@
-extern crate find_folder;
-extern crate graphics;
-extern crate piston;
-extern crate piston_window;
+//! Game setup and very basic main loop.
+//! All the actual work gets done in the Scene.
 
-use piston::input::*;
-use piston_window::*;
+extern crate chrono;
+#[macro_use]
+extern crate failure;
+extern crate fern;
+extern crate ggez;
+extern crate ggez_goodies;
+#[macro_use]
+extern crate log;
+extern crate specs;
+#[macro_use]
+extern crate specs_derive;
+extern crate warmy;
 
-pub struct App {
-    rotation: f64, // Rotation for the square.
-    height: i32,   // original height
-    // x: i32,			// horizontal axis, not used atm
-    y: i32, // vertical axis
-    glyph: Glyphs,
-    points: i32, //current points
+use ggez::*;
+use ggez::conf;
+use ggez::event;
+
+use ggez::event::*;
+use ggez::graphics;
+use ggez::timer;
+
+use std::path;
+
+// Modules that define actual content
+mod components;
+mod scenes;
+mod systems;
+mod world;
+
+// Modules that define utility stuff.
+mod error;
+mod input;
+mod resources;
+mod util;
+
+/// Function to set up logging.
+/// We write all debug messages (which will be a log)
+/// to both stdout and a log file.
+/// See the ggez logging example for a more sophisticated
+/// setup, we should incorporate some of that here.
+///
+/// TODO: Don't output colors to the log file.
+fn setup_logger() -> Result<(), fern::InitError> {
+    use fern::colors::{Color, ColoredLevelConfig};
+    // I'm used to Python's logging colors and format,
+    // so let's do something like that.
+    let colors = ColoredLevelConfig::default()
+        .info(Color::Green)
+        .debug(Color::BrightMagenta)
+        .trace(Color::BrightBlue);
+    fern::Dispatch::new()
+        .format(move |out, message, record| {
+            out.finish(format_args!(
+                "[{}][{:<14}][{}] {}",
+                chrono::Local::now().format("%Y-%m-%d %H:%M:%S"),
+                colors.color(record.level()).to_string(),
+                record.target(),
+                message
+            ))
+        })
+        // gfx_device_gl is very chatty on info loglevel, so
+        // filter that a bit more strictly.
+        .level_for("gfx_device_gl", log::LevelFilter::Warn)
+        .level(log::LevelFilter::Debug)
+        .chain(std::io::stdout())
+        .chain(std::fs::OpenOptions::new()
+               .write(true)
+               .create(true)
+               .truncate(true)
+               .open("debug.log")?)
+        .apply()?;
+    Ok(())
 }
 
-impl App {
-    fn render(&mut self, window: &mut PistonWindow, e: &piston_window::Event, args: &RenderArgs) {
-        use graphics::*;
+/// Main game state.  This holds all our STUFF,
+/// but most of the actual game data are
+/// in `Scenes`, and the `FSceneStack` contains them
+/// plus global game state.
+pub struct MainState {
+    scenes: scenes::FSceneStack,
+    input_binding: input::InputBinding,
+}
 
-        const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
-        const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
-        const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
-
-        let square = rectangle::square(0.0, 0.0, 50.0);
-        let rotation = self.rotation;
-        let (x, y) = ((args.width / 2) as f64, self.y as f64);
-
-        window.draw_2d(e, |c, gl| {
-            // Clear the screen.
-            clear(WHITE, gl);
-
-            let tfbox = c
-                .transform
-                .trans(x, y)
-                .rot_rad(rotation)
-                .trans(-25.0, -25.0);
-
-            // Draw a box rotating around the middle of the screen.
-            rectangle(RED, square, tfbox, gl);
-
-            let tftext = c.transform.trans(450.0, 40.0);
-            text::Text::new_color(GREEN, 32)
-                .draw(
-                    &format!("Points: {}", self.points),
-                    &mut self.glyph,
-                    &c.draw_state,
-                    tftext,
-                    gl,
-                )
-                .unwrap();
-        });
-    }
-
-    fn update(&mut self, args: &UpdateArgs) {
-        // Rotate 2 radians per second.
-        self.rotation += 2.0 * args.dt;
-        // and move downwards on screen per second
-        self.y += 1;
-        if self.y == self.height {
-            self.y = 0 as i32;
+impl MainState {
+    pub fn new(resource_dir: Option<path::PathBuf>, ctx: &mut Context) -> Self {
+        let world = world::World::new(ctx, resource_dir.clone());
+        let mut scenestack = scenes::FSceneStack::new(ctx, world);
+        let initial_scene = Box::new(scenes::level::LevelScene::new(ctx, &mut scenestack.world));
+        scenestack.push(initial_scene);
+        MainState {
+            scenes: scenestack,
+            input_binding: input::create_input_binding(),
         }
-    }
-
-    fn add_click(&mut self) {
-        self.points += 1;
     }
 }
 
-fn main() {
-    let mut window: PistonWindow = WindowSettings::new("clicker", [600, 600])
-        .exit_on_esc(true)
-        .build()
-        .unwrap();
-
-    let assets = find_folder::Search::ParentsThenKids(3, 3)
-        .for_folder("assets")
-        .unwrap();
-    println!("{:?}", assets);
-    let ref font = assets.join("FiraSans-Regular.ttf");
-
-    let factory = window.factory.clone();
-    let glyphs = Glyphs::new(font, factory, TextureSettings::new()).unwrap();
-
-    // Create a new game and run it.
-    let mut app = App {
-        rotation: 0.0,
-        height: 600,
-        // x: 300,
-        y: 0,
-        glyph: glyphs,
-        points: 0,
-    };
-
-    let mut events = Events::new(EventSettings::new());
-    while let Some(e) = events.next(&mut window) {
-        if let Some(a) = e.render_args() {
-            app.render(&mut window, &e, &a);
+impl EventHandler for MainState {
+    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+        const DESIRED_FPS: u32 = 60;
+        while timer::check_update_time(ctx, DESIRED_FPS) {
+            self.scenes.update();
         }
-        if let Some(arg) = e.update_args() {
-            app.update(&arg)
+        self.scenes.world.assets.sync(ctx);
+
+        Ok(())
+    }
+
+    fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
+        graphics::clear(ctx);
+        self.scenes.draw(ctx);
+        graphics::present(ctx);
+        Ok(())
+    }
+
+    fn key_down_event(
+        &mut self,
+        _ctx: &mut Context,
+        keycode: Keycode,
+        _keymod: Mod,
+        _repeat: bool,
+    ) {
+        if let Some(ev) = self.input_binding.resolve(keycode) {
+            self.scenes.input(ev, true);
         }
-        if let Some(Button::Mouse(_button)) = e.press_args() {
-            app.add_click()
+    }
+
+    fn key_up_event(&mut self, _ctx: &mut Context, keycode: Keycode, _keymod: Mod, _repeat: bool) {
+        if let Some(ev) = self.input_binding.resolve(keycode) {
+            self.scenes.input(ev, false);
         }
+    }
+}
+
+pub fn main() {
+    setup_logger().expect("Could not set up logging!");
+    let mut cb = ContextBuilder::new("game-template", "ggez")
+        .window_setup(conf::WindowSetup::default().title("game-template"))
+        .window_mode(conf::WindowMode::default().dimensions(800, 600));
+
+    // We add the CARGO_MANIFEST_DIR/resources to the filesystems paths so
+    // we we look in the cargo project for files.
+    // And save it so we can feed there result into warmy
+    let cargo_path: Option<path::PathBuf> = option_env!("CARGO_MANIFEST_DIR").map(|env_path| {
+        let mut res_path = path::PathBuf::from(env_path);
+        res_path.push("resources");
+        res_path
+    });
+    // If we have such a path then add it to the context builder too
+    // (modifying the cb from inside a closure gets sticky)
+    if let Some(ref s) = cargo_path {
+        cb = cb.add_resource_path(s);
+    }
+
+    let ctx = &mut cb.build().unwrap();
+
+    let state = &mut MainState::new(cargo_path, ctx);
+    if let Err(e) = event::run(ctx, state) {
+        println!("Error encountered: {}", e);
+    } else {
+        println!("Game exited cleanly.");
     }
 }

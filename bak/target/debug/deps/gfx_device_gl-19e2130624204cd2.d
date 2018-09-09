@@ -1,0 +1,11 @@
+C:\Users\Morgan\Projects\clicker\target\debug\deps\libgfx_device_gl-19e2130624204cd2.rlib: C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\lib.rs C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\command.rs C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\factory.rs C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\info.rs C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\shade.rs C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\state.rs C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\tex.rs
+
+C:\Users\Morgan\Projects\clicker\target\debug\deps\gfx_device_gl-19e2130624204cd2.d: C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\lib.rs C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\command.rs C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\factory.rs C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\info.rs C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\shade.rs C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\state.rs C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\tex.rs
+
+C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\lib.rs:
+C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\command.rs:
+C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\factory.rs:
+C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\info.rs:
+C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\shade.rs:
+C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\state.rs:
+C:\Users\Morgan\.cargo\registry\src\github.com-1ecc6299db9ec823\gfx_device_gl-0.15.3\src\tex.rs:
