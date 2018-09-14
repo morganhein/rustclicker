@@ -14,10 +14,6 @@ use rand::prelude::*;
 mod objects;
 
 pub struct App {
-    rotation: f64,   // Rotation for the square.
-    height: i32,    // original height
-    // x: i32,			// horizontal axis, not used atm
-    y: i32,			// vertical axis
     glyph: Glyphs,
     points: i32,		//current points
     objects: Vec<objects::Object>,
@@ -70,7 +66,7 @@ impl App {
         if self.objects.len() == 0 {
             self.add_object();
         };
-        let make_new = self.rng.gen_range(0, 300);
+        let make_new: i32 = self.rng.gen_range(0, 300);
         if make_new <= 40 {
             self.add_object();
         }
@@ -94,20 +90,9 @@ impl App {
     }
 
     fn add_object(&mut self) {
+        use objects::*;
 //        println!("Addding new object.");
-        let x = self.rng.gen_range(0, self.window_size.width);
-        let vx = self.rng.gen_range(-4.0, 4.0);
-        let vy = self.rng.gen_range(0.5, 5.0);
-        let o = objects::Object{
-            rotation: 0.0,
-            position: objects::Location{
-                x: x as f64,
-                y: 0.0,
-            },
-            velocity: [vx, vy],
-            color: [1.0, 0.0, 0.0, 1.0],
-            destroy: false,
-        };
+        let o = Object::new(self.window_size);
         self.objects.push(o)
     }
 }
@@ -134,17 +119,12 @@ fn main() {
 
     // Create a new game and run it.
     let mut app = App {
-        rotation: 0.0,
-        height: 600,
-        // x: 300,
-        y: 0,
         glyph: glyphs,
         points: 0,
         objects: Vec::new(),
         window_size,
         fps: UpdateRateCounter::new(60),
-        rng: thread_rng(),
-
+        rng: rand::thread_rng(),
     };
 
     app.add_object();
