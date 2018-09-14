@@ -1,8 +1,7 @@
 [package]
-name = "ggez_game_template"
+name = "clicker_invaders"
 version = "0.1.0"
-authors = ["Simon Heath <icefoxen@gmail.com>"]
-license = "MIT OR Apache-2.0"
+authors = ["Morgan Hein <work@morganhe.in>"]
 readme = "README.md"
 
 [dependencies]

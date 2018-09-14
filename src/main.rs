@@ -88,8 +88,10 @@ impl MainState {
     pub fn new(resource_dir: Option<path::PathBuf>, ctx: &mut Context) -> Self {
         let world = world::World::new(ctx, resource_dir.clone());
         let mut scenestack = scenes::FSceneStack::new(ctx, world);
+        let game_scene = Box::new(scenes::game::GameScene::new(ctx, &mut scenestack.world));
         let initial_scene = Box::new(scenes::level::LevelScene::new(ctx, &mut scenestack.world));
         scenestack.push(initial_scene);
+        scenestack.push(game_scene);
         MainState {
             scenes: scenestack,
             input_binding: input::create_input_binding(),
@@ -136,8 +138,8 @@ impl EventHandler for MainState {
 
 pub fn main() {
     setup_logger().expect("Could not set up logging!");
-    let mut cb = ContextBuilder::new("game-template", "ggez")
-        .window_setup(conf::WindowSetup::default().title("game-template"))
+    let mut cb = ContextBuilder::new("game-template", "morganhein")
+        .window_setup(conf::WindowSetup::default().title("Clicker Invaders"))
         .window_mode(conf::WindowMode::default().dimensions(800, 600));
 
     // We add the CARGO_MANIFEST_DIR/resources to the filesystems paths so

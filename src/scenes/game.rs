@@ -11,13 +11,13 @@ use systems::*;
 use resources;
 use world::World;
 
-pub struct LevelScene {
+pub struct GameScene {
     done: bool,
     kiwi: warmy::Res<resources::Image>,
     dispatcher: specs::Dispatcher<'static, 'static>,
 }
 
-impl LevelScene {
+impl GameScene {
     pub fn new(ctx: &mut ggez::Context, world: &mut World) -> Self {
         let done = false;
         let kiwi = world
@@ -25,7 +25,7 @@ impl LevelScene {
             .get::<_, resources::Image>(&warmy::FSKey::new("/images/kiwi.png"), ctx)
             .unwrap();
         let dispatcher = Self::register_systems();
-        LevelScene {
+        GameScene {
             done,
             kiwi,
             dispatcher
@@ -39,7 +39,7 @@ impl LevelScene {
     }
 }
 
-impl scene::Scene<World, input::InputEvent> for LevelScene {
+impl scene::Scene<World, input::InputEvent> for GameScene {
     fn update(&mut self, gameworld: &mut World) -> FSceneSwitch {
         self.dispatcher
             .dispatch(&mut gameworld.specs_world.res);
@@ -59,7 +59,7 @@ impl scene::Scene<World, input::InputEvent> for LevelScene {
     }
 
     fn name(&self) -> &str {
-        "LevelScene"
+        "GameScene"
     }
 
     fn input(&mut self, gameworld: &mut World, ev: input::InputEvent, _started: bool) {
