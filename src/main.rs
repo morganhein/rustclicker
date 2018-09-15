@@ -9,17 +9,17 @@ use piston::input::*;
 use piston_window::*;
 use update_rate::UpdateRateCounter;
 use rand::prelude::*;
+use std::cmp::Ordering;
 //use piston::window::*;
-
+mod player;
 mod objects;
 
 pub struct App {
     glyph: Glyphs,
-    points: i32,		//current points
-    objects: Vec<objects::Object>,
+    objects: Vec<objects::Invader>,
     fps: update_rate::UpdateRateCounter,
     window_size: piston::window::Size,
-    rng: rand::ThreadRng,
+    player: player::Player,
 }
 
 impl App {
@@ -32,21 +32,18 @@ impl App {
 
         const WHITE: [f32; 4] = [0.0, 0.0, 0.0, 0.0];
 
-        let square = rectangle::square(0.0, 0.0, 25.0);
         self.window_size = window.size();
         window.draw_2d(e, |c, gl| {
             // Clear the screen.
             clear(WHITE, gl);
 
-            for object in self.objects.iter() {
-                let tfbox = c.transform.trans(object.position.x, object.position.y)
-                    .rot_rad(object.rotation);
-                rectangle(object.color, square, tfbox, gl);
+            for object in self.objects.iter_mut() {
+                object.draw(&c, gl);
             };
 
             let tftext = c.transform.trans(450.0, 40.0);
             text::Text::new_color([0.0, 1.0, 0.0, 1.0], 32).draw(
-                &format!("Points: {}", self.points),
+                &format!("Points: {}", self.player.points),
                 &mut self.glyph,
                 &c.draw_state,
                 tftext, gl)
@@ -66,33 +63,47 @@ impl App {
         if self.objects.len() == 0 {
             self.add_object();
         };
-        let make_new: i32 = self.rng.gen_range(0, 300);
+        let mut rng: rand::ThreadRng = thread_rng();
+        let make_new: i32 = rng.gen_range(0, 300);
         if make_new <= 40 {
             self.add_object();
         }
-        let mut to_delete: Vec<usize> = Vec::new();
-        for (it, object) in self.objects.iter_mut().enumerate() {
-            if object.destroy {
-//                println!("Object hit the ground, queueing to be destroyed!");
-                to_delete.push(it);
-                continue;
-            }
+        for  object in self.objects.iter_mut() {
             object.update(args.dt, self.window_size)
         };
         //remove the shit that hit the ground
-        for index in to_delete {
-            self.objects.remove(index);
+        self.objects.retain(|ref o| !o.destroy );
+    }
+
+    fn mouse_click(&mut self) {
+        self.player.clicks += 1;
+        self.objects.sort_unstable_by(|a, b| {
+            if a.position.y == b.position.y {
+                return Ordering::Equal;
+            }
+            if a.position.y > b.position.y {
+                return Ordering::Less;
+            }
+            return Ordering::Greater;
+        });
+        let mut dmg: i64 = self.player.get_click_points() as i64;
+        self.player.add_points(dmg as u64);
+        let mut index: usize = 0;
+        while dmg > 0 {
+            if index >= self.objects.len() {
+                return;
+            }
+            let o = &mut self.objects[index];
+            o.take_hit(25);
+            dmg -= 25;
+            index += 1;
         }
     }
 
-    fn add_click(&mut self) {
-    	self.points += 1;
-    }
 
     fn add_object(&mut self) {
         use objects::*;
-//        println!("Addding new object.");
-        let o = Object::new(self.window_size);
+        let o = Invader::new(self.window_size);
         self.objects.push(o)
     }
 }
@@ -120,14 +131,11 @@ fn main() {
     // Create a new game and run it.
     let mut app = App {
         glyph: glyphs,
-        points: 0,
         objects: Vec::new(),
         window_size,
         fps: UpdateRateCounter::new(60),
-        rng: rand::thread_rng(),
+        player: player::Player::new(),
     };
-
-    app.add_object();
 
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
@@ -140,7 +148,7 @@ fn main() {
 	    	app.update(&arg)
 	    }
 	    if let Some(Button::Mouse(_button)) = e.press_args() {
-	    	app.add_click()
+	    	app.mouse_click()
         }
     }
 }
