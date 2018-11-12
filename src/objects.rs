@@ -1,4 +1,3 @@
-extern crate piston;
 extern crate rand;
 
 use rand::prelude::*;
